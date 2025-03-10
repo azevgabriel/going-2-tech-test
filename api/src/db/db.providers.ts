@@ -1,21 +1,11 @@
-import { DataSource } from 'typeorm';
+import { TypeORMDataSource } from './typeorm';
+import { TYPE_ORM_PROVIDER_KEY } from './typeorm/constants';
 
 export const databaseProviders = [
   {
-    provide: 'DATA_SOURCE',
+    provide: TYPE_ORM_PROVIDER_KEY,
     useFactory: async () => {
-      const dataSource = new DataSource({
-        type: 'postgres',
-        host: 'localhost',
-        port: 5432,
-        username: 'root',
-        password: 'root',
-        database: 'postgres',
-        entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-        synchronize: true,
-      });
-
-      return dataSource.initialize();
+      return await TypeORMDataSource.initialize();
     },
   },
 ];
