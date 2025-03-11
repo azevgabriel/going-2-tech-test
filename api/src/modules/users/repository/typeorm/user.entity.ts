@@ -21,8 +21,8 @@ class User {
   @Column()
   email: string;
 
-  @Column()
-  role: string;
+  @Column('enum')
+  role: 'manager' | 'user' | 'admin';
 
   @CreateDateColumn()
   created_at: Date;
