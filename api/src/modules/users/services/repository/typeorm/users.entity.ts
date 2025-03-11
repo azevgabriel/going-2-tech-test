@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
 import {
   Column,
   CreateDateColumn,
@@ -7,9 +6,9 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-@Entity('users')
-class User {
-  @PrimaryColumn()
+@Entity()
+class Users {
+  @PrimaryColumn('uuid')
   id: string;
 
   @Column()
@@ -37,12 +36,6 @@ class User {
 
   @Column()
   updated_by_user_id: string;
-
-  constructor() {
-    if (!this.id) {
-      this.id = uuidv4();
-    }
-  }
 }
 
-export { User };
+export { Users };

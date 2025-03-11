@@ -8,7 +8,7 @@ import { UserRepositoryService } from '../../repository/users-repository.service
 @Injectable()
 export class AddUserUseCaseService {
   constructor(
-    @Inject(USER_CONSTS['services']['repository'])
+    @Inject(USER_CONSTS['services']['repository']['service'])
     private userRepository: UserRepositoryService,
     @Inject(CRYPT_CONSTS['service'])
     private cryptService: CryptService,

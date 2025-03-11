@@ -1,13 +1,8 @@
 import { Module } from '@nestjs/common';
-import { CryptService } from './crypt.service';
-import { CRYPT_CONSTS } from './constants';
+import { cryptProvider } from './crypt.provider';
 
 @Module({
-  exports: [
-    {
-      provide: CRYPT_CONSTS['service'],
-      useClass: CryptService,
-    },
-  ],
+  exports: [cryptProvider],
+  providers: [cryptProvider],
 })
 export class CryptModule {}

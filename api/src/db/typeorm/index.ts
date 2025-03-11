@@ -9,6 +9,7 @@ const TYPE_ORM_CONFIG: DataSourceOptions = {
   database: process.env.DB_DATABASE || 'postgres',
   migrations: [__dirname + '/migrations/*{.ts,.js}'],
   entities: ['dist/**/*.entity.js'],
+  synchronize: true,
 };
 
 export const TypeORMDataSource = new DataSource(TYPE_ORM_CONFIG);

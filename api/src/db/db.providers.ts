@@ -5,7 +5,7 @@ export const databaseProviders = [
   {
     provide: TYPE_ORM_PROVIDER_KEY,
     useFactory: async () => {
-      return await TypeORMDataSource.initialize();
+      return TypeORMDataSource.initialize();
     },
   },
 ];
