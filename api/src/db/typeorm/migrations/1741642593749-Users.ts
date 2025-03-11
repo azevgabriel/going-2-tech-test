@@ -26,7 +26,8 @@ export class Users1741642593749 implements MigrationInterface {
           },
           {
             name: 'role',
-            type: 'varchar',
+            type: 'enum',
+            enum: ['manager', 'user', 'admin'],
           },
           {
             name: 'created_at',

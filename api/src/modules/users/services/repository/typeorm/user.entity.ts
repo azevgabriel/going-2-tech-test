@@ -21,7 +21,9 @@ class User {
   @Column()
   email: string;
 
-  @Column('enum')
+  @Column('enum', {
+    enum: ['manager', 'user', 'admin'],
+  })
   role: 'manager' | 'user' | 'admin';
 
   @CreateDateColumn()
