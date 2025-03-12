@@ -1,4 +1,16 @@
 # Teste Técnico - Desenvolvedor Full-Stack
+
+Versão do node: `v20.16.0`
+
+## Comandos importantes:
+
+**Criando migrações com o TypeORM**
+```bash
+typeorm migration:create ./[MIGRATION_PATH_DIR]/[MIGRATION_FILE_NAME]
+```
+
+`MIGRATION_PATH_DIR`: `src/db/typeorm/migrations`
+
 Description: Cadastro e Gerenciamento de Usuários com Controle de Acesso.
 
 ## Front-end: `Next.js`
@@ -20,8 +32,6 @@ gerentes.
 
 ## Back-end: `Node with Nest.js`
 
-- PostgreSQL with TypeORM
-- 
 
 - CRUD Users with permissions.
 ```ts

@@ -4,6 +4,7 @@ import { UserRepositoryService } from '../users/services/repository/users-reposi
 import { USER_CONSTS } from '../users/constants';
 import { CRYPT_CONSTS } from '../crypt/constants';
 import { CryptService } from '../crypt/crypt.service';
+import { UserPayload } from 'src/presentation/http';
 
 @Injectable()
 export class AuthService {
@@ -29,9 +30,8 @@ export class AuthService {
 
     if (!matchPassword) throw new UnauthorizedException();
 
-    const payload = {
-      email: userWithoutPassword.email,
-      sub: userWithoutPassword.id,
+    const payload: UserPayload = {
+      id: userWithoutPassword?.id,
     };
 
     const token = await this.jwtService.signAsync(payload);
