@@ -12,10 +12,21 @@ export class UserRepositoryService {
   ) {}
 
   async findAll(): Promise<UserModel[]> {
-    return this.userRepository.find();
+    return await this.userRepository.find();
+  }
+
+  async findByEmail(email: string): Promise<UserModel | null> {
+    return await this.userRepository.findOne({ where: { email } });
   }
 
   async create(data: AddUserModel): Promise<UserModel> {
-    return await this.userRepository.save(data);
+    const user = new Users();
+
+    user.name = data.name;
+    user.password = data.password;
+    user.email = data.email;
+    user.role = data.role;
+
+    return await this.userRepository.save(user);
   }
 }

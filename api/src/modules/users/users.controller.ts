@@ -9,7 +9,7 @@ import { UserRepositoryService } from './services/repository/users-repository.se
 export class UsersController {
   constructor(
     @Inject(USER_CONSTS['services']['useCases']['add'])
-    private readonly addUserUseCaseService: AddUserUseCaseService,
+    private readonly userUserUseCaseService: AddUserUseCaseService,
     @Inject(USER_CONSTS['services']['repository']['service'])
     private readonly userRepository: UserRepositoryService,
   ) {}
@@ -21,6 +21,6 @@ export class UsersController {
 
   @Post()
   async addUser(@Body() createUser: CreateUserDto): Promise<UserModel> {
-    return await this.addUserUseCaseService.addUser(createUser);
+    return await this.userUserUseCaseService.addUser(createUser);
   }
 }

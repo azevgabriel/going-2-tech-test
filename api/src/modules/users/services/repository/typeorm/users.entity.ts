@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid';
 import {
   Column,
   CreateDateColumn,
@@ -17,7 +18,9 @@ class Users {
   @Column()
   password: string;
 
-  @Column()
+  @Column({
+    unique: true,
+  })
   email: string;
 
   @Column('enum', {
@@ -28,14 +31,20 @@ class Users {
   @CreateDateColumn()
   created_at: Date;
 
-  @Column()
+  @Column({ nullable: true })
   created_by_user_id: string;
 
   @UpdateDateColumn()
   updated_at: Date;
 
-  @Column()
+  @Column({ nullable: true })
   updated_by_user_id: string;
+
+  constructor() {
+    if (!this.id) {
+      this.id = uuidv4();
+    }
+  }
 }
 
 export { Users };

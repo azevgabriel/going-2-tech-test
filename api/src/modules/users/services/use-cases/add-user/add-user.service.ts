@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, HttpException, HttpStatus } from '@nestjs/common';
 import { CryptService } from 'src/modules/crypt/crypt.service';
 import { USER_CONSTS } from 'src/modules/users/constants';
 import { AddUserModel, UserModel } from 'src/modules/users/interface/user';
@@ -15,7 +15,12 @@ export class AddUserUseCaseService {
   ) {}
 
   async addUser(user: AddUserModel): Promise<UserModel> {
-    const { password } = user;
+    const { password, email } = user;
+
+    const userExists = await this.userRepository.findByEmail(email);
+
+    if (userExists)
+      throw new HttpException('User already exists', HttpStatus.CONFLICT);
 
     const encryptedPassword = await this.cryptService.encrypt(password);
 
