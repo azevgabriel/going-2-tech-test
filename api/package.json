@@ -19,7 +19,8 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "migration:run": "node --env-file=.env -r ts-node/register node_modules/typeorm/cli.js migration:run -d ./src/db/typeorm/index.ts",
-    "migration:revert": "node --env-file=.env -r ts-node/register node_modules/typeorm/cli.js migration:revert -d ./src/db/typeorm/index.ts"
+    "migration:revert": "node --env-file=.env -r ts-node/register node_modules/typeorm/cli.js migration:revert -d ./src/db/typeorm/index.ts",
+    "seed": "node --env-file=.env -r ts-node/register ./src/db/typeorm/seed"
   },
   "dependencies": {
     "@casl/ability": "^6.7.3",
