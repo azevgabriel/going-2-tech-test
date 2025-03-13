@@ -18,29 +18,44 @@ export class AddUserUseCaseService {
   ) {}
 
   async addUser(
-    user: AddUserModel,
-    requestUser: Omit<UserModel, 'password'>,
+    data: AddUserModel,
+    requestUser?: Omit<UserModel, 'password'>,
   ): Promise<UserModel> {
-    const ability = this.caslAbilityService.createForUser(requestUser);
+    const user = new Users();
 
-    if (!ability.can(Action.Add, Users))
-      throw new HttpException(
-        'User does not have permission for this action',
-        HttpStatus.FORBIDDEN,
-      );
+    const {
+      name,
+      password,
+      email,
+      role,
+      created_by_user_id,
+      updated_by_user_id,
+    } = data;
 
-    const { password, email } = user;
+    user.name = name;
+    user.role = role || 'user';
 
     const userExists = await this.userRepository.findByEmail(email);
 
     if (userExists)
-      throw new HttpException('User already exists', HttpStatus.CONFLICT);
+      throw new HttpException('Email already in use', HttpStatus.BAD_REQUEST);
+    else user.email = email;
 
-    const encryptedPassword = await this.cryptService.encrypt(password);
+    if (requestUser) {
+      const ability = this.caslAbilityService.createForUser(requestUser);
 
-    return await this.userRepository.create({
-      ...user,
-      password: encryptedPassword,
-    });
+      if (!ability.can(Action.Add, user))
+        throw new HttpException(
+          'User does not have permission for this action',
+          HttpStatus.FORBIDDEN,
+        );
+
+      if (created_by_user_id) user.created_by_user_id = requestUser.id;
+      if (updated_by_user_id) user.updated_by_user_id = requestUser.id;
+    } else user.role = 'user';
+
+    user.password = await this.cryptService.encrypt(password);
+
+    return await this.userRepository.create(user);
   }
 }

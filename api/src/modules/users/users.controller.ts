@@ -18,6 +18,7 @@ import { PROVIDER_KEYS } from 'src/utils/constants/provider-keys';
 import { UpdateUserByIdUseCaseService } from './services/use-cases/update-user-by-id/update-user-by-id.service';
 import { LoadUsersUseCaseService } from './services/use-cases/load-users/load-users.service';
 import { validate } from 'uuid';
+import { Hybrid } from 'src/presentation/decorators/public.decorator';
 @Controller(PATHS['/users'])
 export class UsersController {
   constructor(
@@ -31,9 +32,13 @@ export class UsersController {
 
   @Get()
   async getUsers(@Req() request: HttpRequest): Promise<UserModel[]> {
+    if (!request.user)
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+
     return await this.loadUsersUseCaseService.loadUser(request.user);
   }
 
+  @Hybrid()
   @Post()
   async addUser(
     @Req() request: HttpRequest,
@@ -48,6 +53,9 @@ export class UsersController {
     @Param() params: { id: string },
     @Body() data: UpdateUserModel,
   ) {
+    if (!request.user)
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+
     if (!params?.id)
       throw new HttpException('ID is required', HttpStatus.BAD_REQUEST);
 

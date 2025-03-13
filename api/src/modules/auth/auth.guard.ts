@@ -9,7 +9,10 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
-import { IS_PUBLIC_KEY } from '../../presentation/decorators/public.decorator';
+import {
+  IS_HYBRID,
+  IS_PUBLIC_KEY,
+} from '../../presentation/decorators/public.decorator';
 import { HttpRequest, UserPayload } from 'src/presentation/http';
 import { UserRepositoryService } from '../users/services/repository/users-repository.service';
 import { PROVIDER_KEYS } from 'src/utils/constants/provider-keys';
@@ -30,13 +33,18 @@ export class AuthGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
+    const isHybrid = this.reflector.getAllAndOverride<boolean>(IS_HYBRID, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
 
     if (isPublic) return true;
 
     const request: HttpRequest = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
 
-    if (!token) throw new UnauthorizedException();
+    if (!token && isHybrid) return true;
+    else if (!token) throw new UnauthorizedException('User unauthorized');
 
     try {
       const payload: UserPayload = await this.jwtService.verifyAsync(token);

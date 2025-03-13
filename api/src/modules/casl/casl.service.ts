@@ -32,6 +32,7 @@ export class CaslAbilityService {
     );
 
     can(Action.Update, Users, { id: user.id, role: undefined });
+    can(Action.Add, Users, { role: 'user' });
 
     if (user.role === 'manager') {
       can(Action.LoadMany, Users);

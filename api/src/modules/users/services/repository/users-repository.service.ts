@@ -24,14 +24,7 @@ export class UserRepositoryService {
   }
 
   async create(data: AddUserModel): Promise<UserModel> {
-    const user = new Users();
-
-    user.name = data.name;
-    user.password = data.password;
-    user.email = data.email;
-    user.role = data.role;
-
-    return await this.userRepository.save(user);
+    return await this.userRepository.save(data);
   }
 
   async updateById(
