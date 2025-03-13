@@ -1,13 +1,13 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { USER_CONSTS } from '../../constants';
 import { Users } from './typeorm/users.entity';
-import { AddUserModel, UserModel } from '../../interface/user';
+import { AddUserModel, UpdateUserModel, UserModel } from '../../interface/user';
+import { PROVIDER_KEYS } from 'src/utils/constants/provider-keys';
 
 @Injectable()
 export class UserRepositoryService {
   constructor(
-    @Inject(USER_CONSTS['services']['repository']['typeorm_db_provider'])
+    @Inject(PROVIDER_KEYS.USER.SERVICES.REPO.DB_USER_INSTANCE)
     private userRepository: Repository<Users>,
   ) {}
 
@@ -32,5 +32,13 @@ export class UserRepositoryService {
     user.role = data.role;
 
     return await this.userRepository.save(user);
+  }
+
+  async updateById(
+    id: string,
+    data: UpdateUserModel,
+  ): Promise<UserModel | null> {
+    await this.userRepository.update({ id }, data);
+    return await this.findById(id);
   }
 }

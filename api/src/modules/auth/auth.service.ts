@@ -1,22 +1,22 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserRepositoryService } from '../users/services/repository/users-repository.service';
-import { USER_CONSTS } from '../users/constants';
-import { CRYPT_CONSTS } from '../crypt/constants';
 import { CryptService } from '../crypt/crypt.service';
 import { UserPayload } from 'src/presentation/http';
+import { PROVIDER_KEYS } from 'src/utils/constants/provider-keys';
+import { AuthLoginModel } from './interfaces/auth';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @Inject(USER_CONSTS['services']['repository']['service'])
+    @Inject(PROVIDER_KEYS.USER.SERVICES.REPO.SERVICE)
     private userRepository: UserRepositoryService,
-    private jwtService: JwtService,
-    @Inject(CRYPT_CONSTS['service'])
+    @Inject(PROVIDER_KEYS.CRYPT.SERVICE)
     private cryptService: CryptService,
+    private jwtService: JwtService,
   ) {}
 
-  async signIn(data: { email: string; password: string }) {
+  async signIn(data: AuthLoginModel) {
     const user = await this.userRepository.findByEmail(data.email);
 
     if (!user) throw new UnauthorizedException();

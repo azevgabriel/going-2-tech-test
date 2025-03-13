@@ -1,20 +1,9 @@
 import { Module } from '@nestjs/common';
-import { CaslAbilityFactory } from './casl-ability.factory/casl-ability.factory';
-import { UserRepositoryModule } from 'src/modules/users/services/repository/users-repository.module';
+import { caslProvider } from './casl.provider';
 
 @Module({
-  imports: [UserRepositoryModule],
-  providers: [
-    {
-      provide: 'CASL_ABILITY_FACTORY',
-      useClass: CaslAbilityFactory,
-    },
-  ],
-  exports: [
-    {
-      provide: 'CASL_ABILITY_FACTORY',
-      useClass: CaslAbilityFactory,
-    },
-  ],
+  imports: [],
+  providers: [caslProvider],
+  exports: [caslProvider],
 })
 export class CaslModule {}

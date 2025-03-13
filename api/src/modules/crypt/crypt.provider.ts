@@ -1,7 +1,7 @@
-import { CRYPT_CONSTS } from './constants';
+import { PROVIDER_KEYS } from 'src/utils/constants/provider-keys';
 import { CryptService } from './crypt.service';
 
 export const cryptProvider = {
-  provide: CRYPT_CONSTS['service'],
+  provide: PROVIDER_KEYS.CRYPT.SERVICE,
   useClass: CryptService,
 };

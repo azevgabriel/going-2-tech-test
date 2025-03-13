@@ -11,3 +11,14 @@ export interface UserModel {
 }
 
 export type AddUserModel = Omit<UserModel, 'id' | 'created_at' | 'updated_at'>;
+
+export type UpdateUserModel = Partial<
+  Omit<
+    UserModel,
+    | 'id'
+    | 'created_at'
+    | 'created_by_user_id'
+    | 'updated_at'
+    | 'updated_by_user_id'
+  >
+>;

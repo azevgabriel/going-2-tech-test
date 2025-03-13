@@ -5,51 +5,59 @@ import {
   HttpException,
   HttpStatus,
   Inject,
+  Param,
   Post,
+  Put,
   Req,
 } from '@nestjs/common';
-import { USER_CONSTS } from './constants';
-import { UserModel } from './interface/user';
-import { CreateUserDto } from './dto/create-user.dto';
+import { AddUserModel, UpdateUserModel, UserModel } from './interface/user';
 import { AddUserUseCaseService } from './services/use-cases/add-user/add-user.service';
-import { UserRepositoryService } from './services/repository/users-repository.service';
-import {
-  Action,
-  CaslAbilityFactory,
-} from 'src/modules/casl/casl-ability.factory/casl-ability.factory';
 import { HttpRequest } from 'src/presentation/http';
-import { Users } from './services/repository/typeorm/users.entity';
-import { Public } from 'src/presentation/decorators/public.decorator';
-
-@Controller(USER_CONSTS['route'])
+import { PATHS } from 'src/presentation/routes';
+import { PROVIDER_KEYS } from 'src/utils/constants/provider-keys';
+import { UpdateUserByIdUseCaseService } from './services/use-cases/update-user-by-id/update-user-by-id.service';
+import { LoadUsersUseCaseService } from './services/use-cases/load-users/load-users.service';
+import { validate } from 'uuid';
+@Controller(PATHS['/users'])
 export class UsersController {
   constructor(
-    @Inject(USER_CONSTS['services']['useCases']['add'])
+    @Inject(PROVIDER_KEYS.USER.SERVICES.USECASES.ADD)
     private readonly userUserUseCaseService: AddUserUseCaseService,
-    @Inject(USER_CONSTS['services']['repository']['service'])
-    private readonly userRepository: UserRepositoryService,
-    @Inject('CASL_ABILITY_FACTORY')
-    private readonly caslAbilityFactory: CaslAbilityFactory,
+    @Inject(PROVIDER_KEYS.USER.SERVICES.USECASES.UPDATE_BY_ID)
+    private readonly updateUserByIdUseCaseService: UpdateUserByIdUseCaseService,
+    @Inject(PROVIDER_KEYS.USER.SERVICES.USECASES.LOAD)
+    private readonly loadUsersUseCaseService: LoadUsersUseCaseService,
   ) {}
 
   @Get()
   async getUsers(@Req() request: HttpRequest): Promise<UserModel[]> {
-    const user = request.user;
-
-    const ability = await this.caslAbilityFactory.createForUser(user);
-
-    if (ability.can(Action.ReadAll, Users))
-      return await this.userRepository.findAll();
-
-    throw new HttpException(
-      'User does not have permission for this action',
-      HttpStatus.FORBIDDEN,
-    );
+    return await this.loadUsersUseCaseService.loadUser(request.user);
   }
 
-  @Public()
   @Post()
-  async addUser(@Body() createUser: CreateUserDto): Promise<UserModel> {
-    return await this.userUserUseCaseService.addUser(createUser);
+  async addUser(
+    @Req() request: HttpRequest,
+    @Body() data: AddUserModel,
+  ): Promise<UserModel> {
+    return await this.userUserUseCaseService.addUser(data, request.user);
+  }
+
+  @Put(':id')
+  async updateUserById(
+    @Req() request: HttpRequest,
+    @Param() params: { id: string },
+    @Body() data: UpdateUserModel,
+  ) {
+    if (!params?.id)
+      throw new HttpException('ID is required', HttpStatus.BAD_REQUEST);
+
+    if (!validate(params.id))
+      throw new HttpException('Invalid ID', HttpStatus.BAD_REQUEST);
+
+    return await this.updateUserByIdUseCaseService.updateUserById(
+      params.id,
+      data,
+      request.user,
+    );
   }
 }

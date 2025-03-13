@@ -1,4 +1,4 @@
-export class CreateUserDto {
+export interface AuthLoginModel {
   email: string;
   password: string;
 }

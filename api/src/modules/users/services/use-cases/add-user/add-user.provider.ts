@@ -1,7 +1,7 @@
-import { USER_CONSTS } from 'src/modules/users/constants';
 import { AddUserUseCaseService } from './add-user.service';
+import { PROVIDER_KEYS } from 'src/utils/constants/provider-keys';
 
 export const addUserUseCaseProvider = {
-  provide: USER_CONSTS['services']['useCases']['add'],
+  provide: PROVIDER_KEYS.USER.SERVICES.USECASES.ADD,
   useClass: AddUserUseCaseService,
 };
