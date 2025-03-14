@@ -66,6 +66,19 @@ export default function Home() {
               >
                 Editar
               </Button>
+              <Button
+                htmlProps={{
+                  onClick: () =>
+                    setUserModelProps({
+                      action: "delete",
+                      open: true,
+                      data: user,
+                    }),
+                }}
+                type="danger"
+              >
+                Deletar
+              </Button>
             </div>
           </div>
         </div>
@@ -132,7 +145,9 @@ export default function Home() {
         <UserModal
           props={userModalProps}
           setProps={setUserModelProps}
-          callback={updateProfile}
+          callback={
+            userModalProps?.action === "update" ? updateProfile : logout
+          }
           key="update-profile"
         />
       </>

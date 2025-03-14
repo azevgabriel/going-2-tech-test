@@ -1,8 +1,8 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { Repository } from 'typeorm';
-import { Users } from './typeorm/users.entity';
-import { AddUserModel, UpdateUserModel, UserModel } from '../../interface/user';
+import { Inject, Injectable } from '@nestjs/common';
 import { PROVIDER_KEYS } from 'src/utils/constants/provider-keys';
+import { Repository } from 'typeorm';
+import { AddUserModel, UpdateUserModel, UserModel } from '../../interface/user';
+import { Users } from './typeorm/users.entity';
 
 @Injectable()
 export class UserRepositoryService {
@@ -11,12 +11,18 @@ export class UserRepositoryService {
     private userRepository: Repository<Users>,
   ) {}
 
+  async deleteById(id: string): Promise<void> {
+    await this.userRepository.delete({ id });
+  }
+
   async findById(id: string): Promise<UserModel | null> {
     return await this.userRepository.findOne({ where: { id } });
   }
 
   async findAll(): Promise<Users[]> {
-    return await this.userRepository.find();
+    return await this.userRepository.find({
+      order: { name: 'ASC' },
+    });
   }
 
   async findByEmail(email: string): Promise<UserModel | null> {

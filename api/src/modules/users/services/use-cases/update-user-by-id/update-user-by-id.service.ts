@@ -48,7 +48,13 @@ export class UpdateUserByIdUseCaseService {
 
     if (ability.can(Action.Update, partialUserUpdate)) {
       Reflect.deleteProperty(partialUserUpdate, id);
-      return await this.userRepository.updateById(user.id, data);
+      const response = await this.userRepository.updateById(user.id, {
+        ...data,
+        updated_by_user_id: requestUser.id,
+        updated_at: new Date(),
+      });
+      if (response) Reflect.deleteProperty(response, 'password');
+      return response;
     }
 
     throw new HttpException(

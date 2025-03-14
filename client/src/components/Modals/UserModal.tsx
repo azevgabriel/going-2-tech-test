@@ -3,6 +3,7 @@ import { useSession } from "@/hooks/useSession";
 import { ModalActions } from "@/interfaces/ModalActions";
 import { UserModel } from "@/interfaces/User";
 import { addUserRequest } from "@/requests/users/add-user";
+import { deleteUserByIdRequest } from "@/requests/users/delete-user-by-id";
 import { updateUserRequestById } from "@/requests/users/update-user-by-id";
 import { ROLES_PT_BR } from "@/utils/constants/role";
 import React, { useEffect, useState } from "react";
@@ -12,7 +13,7 @@ import { Button } from "../Shared/Button";
 interface UserModalProps {
   props: ModalActions<UserModel>;
   setProps: React.Dispatch<React.SetStateAction<ModalActions<UserModel>>>;
-  callback?: () => Promise<void>;
+  callback?: () => Promise<void> | void;
 }
 
 export const UserModal = ({ props, setProps, callback }: UserModalProps) => {
@@ -99,6 +100,25 @@ export const UserModal = ({ props, setProps, callback }: UserModalProps) => {
     await callback?.();
   };
 
+  const handleDeleteUser = async () => {
+    setLoading(true);
+    try {
+      await deleteUserByIdRequest(props.data?.id || "");
+      callback?.();
+      onReset();
+    } catch (error) {
+      setLoading(false);
+
+      const serverError = error as {
+        statusCode?: number;
+        message?: string;
+      };
+
+      if (serverError?.statusCode === 403)
+        return showAlert("danger", "Você não tem permissão necessária!");
+    }
+  };
+
   const handleAction = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -116,12 +136,21 @@ export const UserModal = ({ props, setProps, callback }: UserModalProps) => {
         message?: string;
       };
 
+      if (serverError?.statusCode === 403)
+        return showAlert("danger", "Você não tem permissão necessária!");
+
       if (serverError?.statusCode === 400)
         return showAlert("danger", "Email já cadastrado!");
 
       return showAlert(
         "danger",
-        `Erro ao ${props.action === "add" ? "criar" : "editar"} usuário!`
+        `Erro ao ${
+          props.action === "add"
+            ? "criar"
+            : props.action === "update"
+            ? "editar"
+            : "excluir"
+        } usuário!`
       );
     }
   };
@@ -141,7 +170,12 @@ export const UserModal = ({ props, setProps, callback }: UserModalProps) => {
         >
           <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900">
-              {props.action === "add" ? "Criar" : "Editar"} Usuário
+              {props.action === "add"
+                ? "Criar"
+                : props.action === "update"
+                ? "Editar"
+                : "Excluir"}{" "}
+              Usuário
             </h3>
             <div className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg w-8 h-8 inline-flex justify-center items-center ">
               <Button
@@ -169,108 +203,144 @@ export const UserModal = ({ props, setProps, callback }: UserModalProps) => {
               </Button>
             </div>
           </div>
-          <form className="p-4 md:p-5" onSubmit={handleAction}>
-            <div className="grid gap-4 mb-4 grid-cols-1">
-              <InputWithLabel
-                inputProps={{
-                  name: "name",
-                  id: "name",
-                  placeholder: "João da Silva",
-                  required: true,
-                  value: formData.name,
-                  onChange: handleInputChange,
-                }}
-                label={{
-                  html: { htmlFor: "name" },
-                  children: "Seu nome",
-                }}
-              />
-              <InputWithLabel
-                inputProps={{
-                  type: "email",
-                  name: "email",
-                  id: "email",
-                  placeholder: "name@example.com",
-                  required: true,
-                  value: formData.email,
-                  onChange: handleInputChange,
-                }}
-                label={{
-                  html: { htmlFor: "email" },
-                  children: "Seu e-mail",
-                }}
-              />
-              {props?.action === "add" && (
-                <>
-                  <InputWithLabel
-                    inputProps={{
-                      type: "password",
-                      name: "password",
-                      id: "password",
-                      placeholder: "segredo_super_secreto",
-                      required: true,
-                      value: formData.password,
-                      onChange: handleInputChange,
+          {props?.action === "delete" ? (
+            <>
+              <div className="p-4 md:p-5">
+                <h3 className="text-md  text-gray-900">
+                  Tem certeza que deseja excluir o usuário{" "}
+                  <b>
+                    {props.data?.name} ({props.data?.email})?
+                  </b>
+                </h3>
+              </div>
+              <div className="flex flex-row space-x-4 space-y-4">
+                <div className="flex flex-col flex-5">
+                  <Button
+                    htmlProps={{
+                      onClick: onReset,
+                      disabled: loading,
                     }}
-                    label={{
-                      html: { htmlFor: "password" },
-                      children: "Sua senha",
-                    }}
-                  />
-                  <InputWithLabel
-                    inputProps={{
-                      type: "password",
-                      name: "confirm-password",
-                      id: "confirm-password",
-                      placeholder: "segredo_super_secreto_confirmado",
-                      required: true,
-                      value: formData.confirmPassword,
-                      onChange: handleInputChange,
-                    }}
-                    label={{
-                      html: { htmlFor: "confirm-password" },
-                      children: "Confirme sua senha",
-                    }}
-                  />
-                </>
-              )}
-              {props?.action === "update" && user?.role === "admin" && (
-                <div>
-                  <label
-                    htmlFor="role"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                   >
-                    Selecione a função:
-                  </label>
-                  <select
-                    id="role"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    value={formData.role}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        role: e.target.value,
-                      }))
-                    }
-                  >
-                    <option value="admin">{ROLES_PT_BR["admin"]}</option>
-                    <option value="manager">{ROLES_PT_BR["manager"]}</option>
-                    <option value="user">{ROLES_PT_BR["user"]}</option>
-                  </select>
+                    Não
+                  </Button>
                 </div>
-              )}
-            </div>
-            <div className="flex flex-col space-y-4">
-              <Button
-                htmlProps={{
-                  type: "submit",
-                }}
-                loading={loading}
-              >
-                {props.action === "add" ? "Criar" : "Editar"} Usuário
-              </Button>
-            </div>
-          </form>
+                <div className="flex flex-col flex-4">
+                  <Button
+                    htmlProps={{
+                      onClick: handleDeleteUser,
+                    }}
+                    type="danger"
+                    loading={loading}
+                  >
+                    Sim
+                  </Button>
+                </div>
+              </div>
+            </>
+          ) : (
+            <form className="p-4 md:p-5" onSubmit={handleAction}>
+              <div className="grid gap-4 mb-4 grid-cols-1">
+                <InputWithLabel
+                  inputProps={{
+                    name: "name",
+                    id: "name",
+                    placeholder: "João da Silva",
+                    required: true,
+                    value: formData.name,
+                    onChange: handleInputChange,
+                  }}
+                  label={{
+                    html: { htmlFor: "name" },
+                    children: "Seu nome",
+                  }}
+                />
+                <InputWithLabel
+                  inputProps={{
+                    type: "email",
+                    name: "email",
+                    id: "email",
+                    placeholder: "name@example.com",
+                    required: true,
+                    value: formData.email,
+                    onChange: handleInputChange,
+                  }}
+                  label={{
+                    html: { htmlFor: "email" },
+                    children: "Seu e-mail",
+                  }}
+                />
+                {props?.action === "add" && (
+                  <>
+                    <InputWithLabel
+                      inputProps={{
+                        type: "password",
+                        name: "password",
+                        id: "password",
+                        placeholder: "segredo_super_secreto",
+                        required: true,
+                        value: formData.password,
+                        onChange: handleInputChange,
+                      }}
+                      label={{
+                        html: { htmlFor: "password" },
+                        children: "Sua senha",
+                      }}
+                    />
+                    <InputWithLabel
+                      inputProps={{
+                        type: "password",
+                        name: "confirm-password",
+                        id: "confirm-password",
+                        placeholder: "segredo_super_secreto_confirmado",
+                        required: true,
+                        value: formData.confirmPassword,
+                        onChange: handleInputChange,
+                      }}
+                      label={{
+                        html: { htmlFor: "confirm-password" },
+                        children: "Confirme sua senha",
+                      }}
+                    />
+                  </>
+                )}
+                {props?.action === "update" && user?.role === "admin" && (
+                  <div>
+                    <label
+                      htmlFor="role"
+                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >
+                      Selecione a função:
+                    </label>
+                    <select
+                      id="role"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                      value={formData.role}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          role: e.target.value,
+                        }))
+                      }
+                    >
+                      <option value="admin">{ROLES_PT_BR["admin"]}</option>
+                      <option value="manager">{ROLES_PT_BR["manager"]}</option>
+                      <option value="user">{ROLES_PT_BR["user"]}</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-col space-y-4">
+                <Button
+                  htmlProps={{
+                    type: "submit",
+                  }}
+                  loading={loading}
+                >
+                  {props.action === "add" ? "Criar" : "Editar"} Usuário
+                </Button>
+              </div>
+            </form>
+          )}
         </div>
       </div>
     </div>

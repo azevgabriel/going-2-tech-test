@@ -1,4 +1,5 @@
 import { useAlert } from "@/hooks/useAlert";
+import { useSession } from "@/hooks/useSession";
 import { ModalActions } from "@/interfaces/ModalActions";
 import { UserModel } from "@/interfaces/User";
 import { loadUsersRequest } from "@/requests/users/load-users";
@@ -9,6 +10,7 @@ import { Button } from "../Shared/Button";
 import { Spinner } from "../Shared/Spinner";
 
 export const UserTable = () => {
+  const { user } = useSession();
   const { showAlert } = useAlert();
 
   const [users, setUsers] = useState<UserModel[]>([]);
@@ -137,14 +139,27 @@ export const UserTable = () => {
                       >
                         Editar
                       </Button>
-                      <Button
-                        type="danger"
-                        htmlProps={{
-                          disabled: true,
-                        }}
-                      >
-                        Deletar
-                      </Button>
+                      {((user?.role === "manager" && role === "user") ||
+                        user?.role === "admin") &&
+                        user?.id !== id && (
+                          <Button
+                            type="danger"
+                            htmlProps={{
+                              onClick: () =>
+                                setUserModelProps({
+                                  action: "delete",
+                                  open: true,
+                                  data: {
+                                    id,
+                                    name,
+                                    email,
+                                  },
+                                }),
+                            }}
+                          >
+                            Deletar
+                          </Button>
+                        )}
                     </div>
                   </td>
                 </tr>

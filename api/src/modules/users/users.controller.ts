@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
   HttpException,
   HttpStatus,
   Inject,
@@ -10,15 +12,16 @@ import {
   Put,
   Req,
 } from '@nestjs/common';
-import { AddUserModel, UpdateUserModel, UserModel } from './interface/user';
-import { AddUserUseCaseService } from './services/use-cases/add-user/add-user.service';
+import { Hybrid } from 'src/presentation/decorators/public.decorator';
 import { HttpRequest } from 'src/presentation/http';
 import { PATHS } from 'src/presentation/routes';
 import { PROVIDER_KEYS } from 'src/utils/constants/provider-keys';
-import { UpdateUserByIdUseCaseService } from './services/use-cases/update-user-by-id/update-user-by-id.service';
-import { LoadUsersUseCaseService } from './services/use-cases/load-users/load-users.service';
 import { validate } from 'uuid';
-import { Hybrid } from 'src/presentation/decorators/public.decorator';
+import { AddUserModel, UpdateUserModel, UserModel } from './interface/user';
+import { AddUserUseCaseService } from './services/use-cases/add-user/add-user.service';
+import { DeleteUserByIdUseCaseService } from './services/use-cases/delete-user-by-id/delete-user-by-id.service';
+import { LoadUsersUseCaseService } from './services/use-cases/load-users/load-users.service';
+import { UpdateUserByIdUseCaseService } from './services/use-cases/update-user-by-id/update-user-by-id.service';
 @Controller(PATHS['/users'])
 export class UsersController {
   constructor(
@@ -28,6 +31,8 @@ export class UsersController {
     private readonly updateUserByIdUseCaseService: UpdateUserByIdUseCaseService,
     @Inject(PROVIDER_KEYS.USER.SERVICES.USECASES.LOAD)
     private readonly loadUsersUseCaseService: LoadUsersUseCaseService,
+    @Inject(PROVIDER_KEYS.USER.SERVICES.USECASES.DELETE_BY_ID)
+    private readonly deleteUserByIdUseCaseService: DeleteUserByIdUseCaseService,
   ) {}
 
   @Get()
@@ -44,6 +49,13 @@ export class UsersController {
     @Req() request: HttpRequest,
     @Body() data: AddUserModel,
   ): Promise<UserModel> {
+    if (!data || !data.email || !data.password || !data.email) {
+      throw new HttpException(
+        'Email and password are required',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     return await this.userUserUseCaseService.addUser(data, request.user);
   }
 
@@ -67,5 +79,23 @@ export class UsersController {
       data,
       request.user,
     );
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  async deleteById(
+    @Req() request: HttpRequest,
+    @Param() params: { id: string },
+  ) {
+    if (!request.user)
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+
+    if (!params?.id)
+      throw new HttpException('ID is required', HttpStatus.BAD_REQUEST);
+
+    if (!validate(params.id))
+      throw new HttpException('Invalid ID', HttpStatus.BAD_REQUEST);
+
+    await this.deleteUserByIdUseCaseService.deleteById(params.id, request.user);
   }
 }

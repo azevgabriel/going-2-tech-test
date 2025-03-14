@@ -82,7 +82,7 @@ npm run dev
 #### Regras de négocio
 
 - [x] Criar interface de login e armazenamento do JWT.
-- [x] Criar restrições visuais baseadas no nível de acesso do usuário..
+- [x] Criar restrições visuais baseadas no nível de acesso do usuário.
 - [x] Criar formulário de cadastro/edição de usuário com validação.
 - [x] Exibir mensagens de erro quando o usuário tentar acessar recursos sem
       permissão.
@@ -123,7 +123,7 @@ npm run dev
 - [x] Criar entidade `Users` com `id`, `name`, `email`, `password` e `role`;
 - [x] Implementar
   - [x] CRUD para a tabela `Users`
-- [ ] Testes unitários
+- [x] Testes unitários nos arquivos mais sensíveis.
 
 #### Critérios Técnicos
 

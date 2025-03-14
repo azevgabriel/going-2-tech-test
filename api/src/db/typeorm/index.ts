@@ -1,6 +1,6 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
 
-const TYPE_ORM_CONFIG: DataSourceOptions = {
+export const TYPE_ORM_CONFIG: DataSourceOptions = {
   type: 'postgres',
   host: process.env.DB_HOST || 'localhost',
   port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432,
