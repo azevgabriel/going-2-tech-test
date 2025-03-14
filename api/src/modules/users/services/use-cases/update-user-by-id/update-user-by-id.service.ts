@@ -1,10 +1,10 @@
-import { PROVIDER_KEYS } from 'src/utils/constants/provider-keys';
-import { UserRepositoryService } from '../../repository/users-repository.service';
 import { HttpException, HttpStatus, Inject } from '@nestjs/common';
-import { UpdateUserModel, UserModel } from 'src/modules/users/interface/user';
-import { Users } from '../../repository/typeorm/users.entity';
 import { Action, CaslAbilityService } from 'src/modules/casl/casl.service';
 import { CryptService } from 'src/modules/crypt/crypt.service';
+import { UpdateUserModel, UserModel } from 'src/modules/users/interface/user';
+import { PROVIDER_KEYS } from 'src/utils/constants/provider-keys';
+import { Users } from '../../repository/typeorm/users.entity';
+import { UserRepositoryService } from '../../repository/users-repository.service';
 
 export class UpdateUserByIdUseCaseService {
   constructor(
@@ -22,6 +22,13 @@ export class UpdateUserByIdUseCaseService {
     requestUser: Omit<UserModel, 'password'>,
   ) {
     const { email, name, role, password } = data;
+
+    if (email) {
+      const userExists = await this.userRepository.findByEmail(email);
+
+      if (userExists && userExists.id !== id)
+        throw new HttpException('Email already in use', HttpStatus.BAD_REQUEST);
+    }
 
     const user = await this.userRepository.findById(id);
 

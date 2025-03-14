@@ -69,6 +69,12 @@ npm run seed
 npm run dev
 ```
 
+### Logins pós seed
+
+- Usuário Comum: `user@tech.com` | `1234`
+- Usuário Gerente: `manager@tech.com` | `1234`
+- Usuário Admin: `admin@tech.com` | `1234`
+
 ## Considerações sobre o código
 
 ### Front-end
