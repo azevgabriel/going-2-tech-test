@@ -294,7 +294,12 @@ export const UserModal = ({ props, setProps, callback }: UserModalProps) => {
                         placeholder: "segredo_super_secreto_confirmado",
                         required: true,
                         value: formData.confirmPassword,
-                        onChange: handleInputChange,
+                        onChange: (e) => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            confirmPassword: e.target.value,
+                          }));
+                        },
                       }}
                       label={{
                         html: { htmlFor: "confirm-password" },
