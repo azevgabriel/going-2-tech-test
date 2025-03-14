@@ -20,8 +20,8 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post()
-  signIn(@Body() signInDto: AuthLoginModel) {
-    return this.authService.signIn(signInDto);
+  signIn(@Body() data: AuthLoginModel) {
+    return this.authService.signIn(data);
   }
 
   @Get()

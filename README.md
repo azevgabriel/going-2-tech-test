@@ -2,42 +2,95 @@
 
 ## Como rodar o projeto?
 
-### Back-end
+### Front-end
 
-#### Pasta: `/api`
+#### Pasta: `/client`
+
 #### Versão do Node.js: `v20.16.0`
 
 1. Acesse o diretório do projeto:
+
 ```bash
-cd api
+cd client
 ```
 
 2. Utilize o Node.js na versão `v20.16.0` ou execute:
+
 ```bash
 nvm use
 ```
 
 3. Rode as depencias do projeto:
+
+```bash
+npm ci
+```
+
+4. Inicie o projeto:
+
+```bash
+npm run dev
+```
+
+### Back-end
+
+#### Pasta: `/api`
+
+#### Versão do Node.js: `v20.16.0`
+
+1. Acesse o diretório do projeto:
+
+```bash
+cd api
+```
+
+2. Utilize o Node.js na versão `v20.16.0` ou execute:
+
+```bash
+nvm use
+```
+
+3. Rode as depencias do projeto:
+
 ```bash
 npm ci
 ```
 
 4. Configure o `.env` com base no exemplo fornecido em `.env.example`
 5. Execute a seed para gerar alguns usuários pré-definidos.
+
 ```bash
 npm run seed
 ```
 
 6. Inicie o projeto:
+
 ```bash
 npm run dev
 ```
 
 ## Considerações sobre o código
 
+### Front-end
+
+#### Regras de négocio
+
+- [x] Criar interface de login e armazenamento do JWT.
+- [x] Criar restrições visuais baseadas no nível de acesso do usuário..
+- [x] Criar formulário de cadastro/edição de usuário com validação.
+- [x] Exibir mensagens de erro quando o usuário tentar acessar recursos sem
+      permissão.
+- [x] Permissões verificadas no front-end.
+
+##### Tecnologia
+
+- [x] Next.JS + Tailwind CSS + Context API
+- [x] Fetch API para integração
+
 ### Back-end
 
 #### Estrutura de pastas
+
 ```shell
   $ tree
   .
@@ -50,6 +103,7 @@ npm run dev
   │   └── main.ts
   ├──.env.exemple
 ```
+
 `db`: Contém toda a infraestrutura do banco de dados, incluindo migrations, seed e configuração inicial do TypeORM.
 
 `modules`: Diretório onde os `controllers` e `services` estão organizados de forma modular, seguindo suas respectivas responsabilidades.
@@ -58,11 +112,11 @@ npm run dev
 
 `utils`: Centraliza funções utilitárias e constantes importantes do projeto.
 
-#### Regras de négocio 
+#### Regras de négocio
 
 - [x] Criar entidade `Users` com `id`, `name`, `email`, `password` e `role`;
-- [ ] Implementar 
-  - [ ] CRUD para a tabela `Users`
+- [x] Implementar
+  - [x] CRUD para a tabela `Users`
 - [ ] Testes unitários
 
 #### Critérios Técnicos
@@ -75,6 +129,7 @@ npm run dev
 - [x] Utilizar o CASL para o controle de permissões.
 
 ##### Segurança
+
 - [x] Utilizar o bcrypt como encriptador de senhas. Ao salvar no Banco;
 - [x] Sistema validado com JWT em rotas privadas. `src/modules/auth/auth.guard.ts`
   - [x] Usuário não autenticado, retorno do status code `401 (Unauthorized.)`
@@ -89,11 +144,10 @@ npm run dev
 
 #### Comandos relevantes:
 
-**Criando migrações com o TypeORM (Caso não utilizar o `synchronize`)**
+##### Criando migrações com o TypeORM (Caso não utilizar o `synchronize`)
 
 ```bash
 typeorm migration:create ./[MIGRATION_PATH_DIR]/[MIGRATION_FILE_NAME]
 ```
 
 `MIGRATION_PATH_DIR`: `src/db/typeorm/migrations`
-
