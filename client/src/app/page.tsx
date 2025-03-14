@@ -1,15 +1,76 @@
 "use client";
 
 import { AuthenticateForm } from "@/components/Forms/AuthenticateForm";
+import { UserModal } from "@/components/Modals/UserModal";
 import { Button } from "@/components/Shared/Button";
 import { UserTable } from "@/components/Tables/UserTable";
 import { useSession } from "@/hooks/useSession";
+import { ModalActions } from "@/interfaces/ModalActions";
+import { UserModel } from "@/interfaces/User";
+import { ROLES_PT_BR } from "@/utils/constants/role";
 import Image from "next/image";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 export default function Home() {
-  const { user, logout } = useSession();
+  const { user, logout, updateProfile } = useSession();
   const [menu, setMenu] = useState<"profile" | "users">("profile");
+  const [userModalProps, setUserModelProps] = useState<ModalActions<UserModel>>(
+    {
+      action: "none",
+      open: false,
+    }
+  );
+
+  const menuItems = useMemo(() => {
+    if (!user) return;
+
+    const { email, name, role, created_at } = user;
+
+    if (menu === "users" && user?.role !== "user") return <UserTable />;
+    else
+      return (
+        <div
+          className="flex justify-center items-center"
+          style={{ height: "calc(100vh - 88px - 88px - 16px)" }}
+        >
+          <div className="block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow-sm">
+            <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+              {name}
+            </h5>
+            <p className="font-normal text-gray-700 dark:text-gray-400">
+              {email}
+            </p>
+            <hr className="my-2 h-0.5 border-t-0 bg-neutral-100 dark:bg-white/10" />
+            <p className="font-normal text-gray-700 dark:text-gray-400">
+              {ROLES_PT_BR[role]}
+            </p>
+            <p className="font-normal text-gray-700 dark:text-gray-400">
+              Criado em{" "}
+              {new Date(created_at).toLocaleDateString("pt-br", {
+                month: "long",
+                day: "2-digit",
+                year: "numeric",
+              })}
+            </p>
+            <hr className="my-2 h-0.5 border-t-0 bg-neutral-100 dark:bg-white/10" />
+            <div className="flex flex-col space-y-4">
+              <Button
+                htmlProps={{
+                  onClick: () =>
+                    setUserModelProps({
+                      action: "update",
+                      open: true,
+                      data: user,
+                    }),
+                }}
+              >
+                Editar
+              </Button>
+            </div>
+          </div>
+        </div>
+      );
+  }, [menu, user]);
 
   if (user) {
     return (
@@ -67,10 +128,13 @@ export default function Home() {
             </div>
           </div>
         </nav>
-        <main className="max-w p-2">
-          {menu === "profile" && <></>}
-          {menu === "users" && <UserTable />}
-        </main>
+        <main className="max-w p-2">{menuItems}</main>
+        <UserModal
+          props={userModalProps}
+          setProps={setUserModelProps}
+          callback={updateProfile}
+          key="update-profile"
+        />
       </>
     );
   }

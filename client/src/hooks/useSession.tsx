@@ -1,6 +1,7 @@
 "use client";
 
 import { authenticateUserRequest } from "@/requests/auth/authenticate-user";
+import { getUserProfile } from "@/requests/auth/get-profile";
 import { LOCAL_STORAGE_KEYS } from "@/utils/constants/local-storage";
 import { createContext, ReactNode, useContext, useState } from "react";
 import { AuthenticateUserModel } from "../interfaces/Auth";
@@ -11,6 +12,7 @@ interface SessionContextData {
   login: (values: AuthenticateUserModel) => Promise<void>;
   logout: () => void;
   user: UserModel | null;
+  updateProfile: () => Promise<void>;
 }
 
 interface SessionProviderProps {
@@ -35,8 +37,7 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
   });
 
   const login = async (values: AuthenticateUserModel): Promise<void> => {
-    if (typeof window === "undefined")
-      throw new Error("Ops! Ocorreu um erro ao realizar login");
+    if (typeof window === "undefined") return;
 
     try {
       const authResponse = await authenticateUserRequest(values);
@@ -61,9 +62,24 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
     }
   };
 
+  const updateProfile = async () => {
+    try {
+      const profile = await getUserProfile();
+      window.localStorage.setItem(
+        LOCAL_STORAGE_KEYS["USER"],
+        JSON.stringify(profile)
+      );
+      setUser(profile);
+    } catch {
+      return showAlert(
+        "danger",
+        "Ops! Não foi possivel realizar esse operação."
+      );
+    }
+  };
+
   const logout = () => {
-    if (typeof window === "undefined")
-      throw new Error("Ops! Ocorreu um erro ao realizar login");
+    if (typeof window === "undefined") return;
 
     localStorage.removeItem(LOCAL_STORAGE_KEYS["USER"]);
     localStorage.removeItem(LOCAL_STORAGE_KEYS["TOKEN"]);
@@ -76,6 +92,7 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
         user,
         login,
         logout,
+        updateProfile,
       }}
     >
       {children}

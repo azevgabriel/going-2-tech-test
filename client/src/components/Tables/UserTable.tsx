@@ -1,32 +1,57 @@
+import { useAlert } from "@/hooks/useAlert";
+import { ModalActions } from "@/interfaces/ModalActions";
 import { UserModel } from "@/interfaces/User";
 import { loadUsersRequest } from "@/requests/users/load-users";
 import { ROLES_PT_BR } from "@/utils/constants/role";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { UserModal } from "../Modals/UserModal";
 import { Button } from "../Shared/Button";
 import { Spinner } from "../Shared/Spinner";
 
 export const UserTable = () => {
+  const { showAlert } = useAlert();
+
   const [users, setUsers] = useState<UserModel[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [userModalProps, setUserModelProps] = useState<ModalActions<UserModel>>(
+    {
+      action: "none",
+      open: false,
+    }
+  );
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
       const response = await loadUsersRequest();
       setUsers(response);
     } catch (error) {
-      console.error(error);
+      const serverError = error as {
+        statusCode?: number;
+        message?: string;
+      };
+
+      if (serverError?.statusCode && serverError?.statusCode > 401)
+        return showAlert(
+          "danger",
+          "Você não tem permissão necessária para acessar essa página."
+        );
+
+      return showAlert("danger", "Ops! Aconteceu um problema no servidor.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [showAlert]);
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [fetchUsers]);
 
   return (
-    <div className="relative overflow-x-auto overflow-y-auto shadow-md sm:rounded-lg">
+    <div
+      className="relative overflow-x-auto overflow-y-auto shadow-md sm:rounded-lg"
+      style={{ maxHeight: "calc(100vh - 88px - 16px)" }}
+    >
       {loading ? (
         <div className="flex items-center justify-center w-full p-4">
           <Spinner scale={1} />
@@ -73,7 +98,7 @@ export const UserTable = () => {
                 </td>
               </tr>
             ) : (
-              users?.map(({ name, email, role, created_at }, index) => (
+              users?.map(({ id, name, email, role, created_at }, index) => (
                 <tr
                   className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700 border-gray-200"
                   key={`user-table-row-${index}`}
@@ -95,7 +120,23 @@ export const UserTable = () => {
                   </td>
                   <td className="py-2">
                     <div className="flex justify-evenly">
-                      <Button>Editar</Button>
+                      <Button
+                        htmlProps={{
+                          onClick: () =>
+                            setUserModelProps({
+                              action: "update",
+                              open: true,
+                              data: {
+                                id,
+                                name,
+                                email,
+                                role,
+                              },
+                            }),
+                        }}
+                      >
+                        Editar
+                      </Button>
                       <Button
                         type="danger"
                         htmlProps={{
@@ -112,6 +153,12 @@ export const UserTable = () => {
           </tbody>
         </table>
       )}
+      <UserModal
+        props={userModalProps}
+        setProps={setUserModelProps}
+        key="user-modal-table"
+        callback={fetchUsers}
+      />
     </div>
   );
 };
